@@ -1,5 +1,7 @@
 package top.saymzx.easycontrol.app.entity;
 
+import androidx.annotation.NonNull;
+
 import java.util.Objects;
 
 public class Device {
@@ -98,5 +100,12 @@ public class Device {
     newDevice.smallLengthLan = smallLengthLan;
     newDevice.miniY = miniY;
     return newDevice;
+  }
+
+  @NonNull
+  public String toString() {
+    return "DDD:" + this.address
+            + ":" + this.adbPort
+            + ":" + this.type;
   }
 }

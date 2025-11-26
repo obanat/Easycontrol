@@ -42,6 +42,8 @@ public class DeviceDetailActivity extends Activity {
     isNew = uuid == null;
     if (isNew) device = new Device(UUID.randomUUID().toString(), Device.TYPE_NETWORK);
     else device = AppData.dbHelper.getByUUID(uuid);
+
+    PublicTools.logToast("stream", device.toString(), true);
     // 绘制UI
     drawUI();
     // 设置监听

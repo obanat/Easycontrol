@@ -4,6 +4,7 @@
 package top.saymzx.easycontrol.server.helper;
 
 import android.graphics.Rect;
+import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
@@ -20,14 +21,16 @@ import top.saymzx.easycontrol.server.Server;
 import top.saymzx.easycontrol.server.entity.Device;
 import top.saymzx.easycontrol.server.entity.Options;
 import top.saymzx.easycontrol.server.wrappers.SurfaceControl;
-
+import top.saymzx.easycontrol.server.wrappers.DisplayManager;
+import top.saymzx.easycontrol.server.wrappers.MediaProjectionGlobal;
 public final class VideoEncode {
   private static MediaCodec encedec;
   private static MediaFormat encodecFormat;
   public static boolean isHasChangeConfig = false;
   private static boolean useH265;
 
-  private static IBinder display;
+  //private static IBinder display;
+  private static VirtualDisplay virtualDisplay;
 
   public static void init() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException, ErrnoException {
     useH265 = Options.supportH265 && EncodecTools.isSupportH265();
@@ -38,7 +41,8 @@ public final class VideoEncode {
     byteBuffer.flip();
     Server.writeVideo(byteBuffer);
     // 创建显示器
-    display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
+    //display = SurfaceControl.createDisplay("easycontrol", Build.VERSION.SDK_INT < Build.VERSION_CODES.R || (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && !"S".equals(Build.VERSION.CODENAME)));
+
     // 创建Codec
     createEncodecFormat();
     startEncode();
@@ -68,7 +72,30 @@ public final class VideoEncode {
     encedec.configure(encodecFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
     // 绑定Display和Surface
     surface = encedec.createInputSurface();
-    setDisplaySurface(display, surface);
+
+    try {
+      virtualDisplay = DisplayManager.createVirtualDisplay(
+              "displayManager VirtualDisplay",
+              Device.videoSize.first,
+              Device.videoSize.second,
+              0,
+              surface);
+
+    } catch (Exception displayManagerException) {
+      try {
+        virtualDisplay = MediaProjectionGlobal.createVirtualDisplay(
+                "mediaProjection global",
+                Device.videoSize.first,
+                Device.videoSize.second,
+                0,
+                surface);
+      } catch (NoSuchMethodException | NullPointerException mediaProjectionGlobalException){
+
+        //display = SurfaceControl.createDisplay();
+        //setDisplaySurface(display, surface, videoRotation, contentRect, unlockedVideoRect, layerStack);
+      }
+    }
+
     // 启动编码
     encedec.start();
   }
@@ -109,7 +136,9 @@ public final class VideoEncode {
     try {
       stopEncode();
       encedec.release();
-      SurfaceControl.destroyDisplay(display);
+      if (virtualDisplay != null){
+        virtualDisplay.release();
+      }
     } catch (Exception ignored) {
     }
   }

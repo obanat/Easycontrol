@@ -28,6 +28,7 @@ public class AdbTools {
       else adb = new Adb(PublicTools.getIp(device.address), device.adbPort, AppData.keyPair);
       allAdbConnect.put(addressId, adb);
     }
+    PublicTools.logToast("connectADB", addressId, true);
     return adb;
   }
 

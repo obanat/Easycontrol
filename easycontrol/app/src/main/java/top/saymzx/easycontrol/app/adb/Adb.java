@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import top.saymzx.easycontrol.app.buffer.BufferStream;
 import top.saymzx.easycontrol.app.entity.MyInterface;
+import top.saymzx.easycontrol.app.helper.PublicTools;
 
 // 此部分代码摘抄借鉴了tananaev大佬的开源代码(https://github.com/tananaev/adblib)以及开源库dadb(https://github.com/mobile-dev-inc/dadb)
 // 因为官方adb协议文档写的十分糟糕，因此此部分代码的实现参考了cstyan大佬所整理的文档，再次进行感谢：https://github.com/cstyan/adbDocumentation
@@ -48,6 +49,7 @@ public class Adb {
     }
     if (message.command != AdbProtocol.CMD_CNXN) {
       channel.close();
+      PublicTools.logToast("stream", "ADB连接失败", true);
       throw new Exception("ADB连接失败");
     }
     MAX_DATA = message.arg1;

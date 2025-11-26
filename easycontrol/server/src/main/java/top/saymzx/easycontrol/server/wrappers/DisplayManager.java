@@ -10,6 +10,7 @@ import android.os.Build;
 import android.view.Display;
 import android.view.Surface;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,4 +80,15 @@ public final class DisplayManager {
     android.hardware.display.DisplayManager displayManager = android.hardware.display.DisplayManager.class.getDeclaredConstructor(Context.class).newInstance(FakeContext.get());
     return displayManager.createVirtualDisplay("easycontrol", realDisplayinfo.width, realDisplayinfo.height, realDisplayinfo.density, surface, flags);
   }
+
+  public static VirtualDisplay createVirtualDisplay(String name, int width, int height,
+                                                    int displayIdToMirror, Surface surface)
+          throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    java.lang.Class<?> displayManagerClass =
+            java.lang.Class.forName("android.hardware.display.DisplayManager");
+    return (VirtualDisplay) displayManagerClass.getMethod("createVirtualDisplay",
+                    String.class, int.class, int.class, int.class, Surface.class)
+            .invoke(null, name, width, height, displayIdToMirror, surface);
+  }
+
 }
